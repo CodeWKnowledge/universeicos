@@ -34,7 +34,7 @@ export function VerifyEmail({
         Verify My Email Address →
       </EmailButton>
 
-      <EmailCallout variant="warning" title="Link expires in {expiresInHours} hours">
+      <EmailCallout variant="warning" title={`Link expires in ${expiresInHours} hours`}>
         For security, this verification link will expire. If it expires, you can request a new one from the login page.
       </EmailCallout>
 
