@@ -125,11 +125,30 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               <p className="text-xs text-zinc-500 capitalize">{profile?.role?.replace('_', ' ') || 'Admin'}</p>
             </div>
           </div>
+          </div>
         ) : (
-          <div className="mx-auto h-9 w-9 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-700 font-bold text-xs uppercase">
+          <div className="mx-auto h-9 w-9 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-700 font-bold text-xs uppercase mb-4">
             {user?.email?.charAt(0) || 'A'}
           </div>
         )}
+        <div className="mt-4 pt-4 border-t border-zinc-200">
+          <a 
+            href={import.meta.env.VITE_PUBLIC_URL || 'https://universeicos.app/dashboard'} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className={`
+              flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
+              text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900
+              ${collapsed ? 'justify-center px-0' : ''}
+            `}
+            title={collapsed ? 'Student Dashboard' : undefined}
+          >
+            <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            {!collapsed && <span>Student Dashboard</span>}
+          </a>
+        </div>
       </div>
     </aside>
   )

@@ -11,8 +11,28 @@ import { RoadmapSection } from './landing/RoadmapSection'
 import { FAQSection } from './landing/FAQSection'
 import { FinalCTASection } from './landing/FinalCTASection'
 import { FooterSection } from './landing/FooterSection'
-
+import { useAuth } from '@universe/auth'
+import { useNavigate } from 'react-router-dom'
+import { ROUTES } from '@universe/constants'
+import { useInteractionState } from '../../hooks/useInteractionState'
+import { WelcomeBackModal } from '../../components/WelcomeBackModal'
+import { useState } from 'react'
 export function LandingPage() {
+  const { session, isLoading } = useAuth()
+  const navigate = useNavigate()
+  const { hasInteracted } = useInteractionState()
+  const [showWelcomeBack, setShowWelcomeBack] = useState(false)
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (session) {
+        navigate(ROUTES.DASHBOARD, { replace: true })
+      } else if (hasInteracted) {
+        setShowWelcomeBack(true)
+      }
+    }
+  }, [session, isLoading, hasInteracted, navigate])
+
   useEffect(() => {
     // Basic SEO Setup - In a real SSR framework like Next.js this would be handled differently
     document.title = 'Universe | The OS for Nigerian University Students'
@@ -39,6 +59,13 @@ export function LandingPage() {
       <FAQSection />
       <FinalCTASection />
       <FooterSection />
+      
+      {showWelcomeBack && (
+        <WelcomeBackModal 
+          isOpen={showWelcomeBack} 
+          onClose={() => setShowWelcomeBack(false)} 
+        />
+      )}
     </div>
   )
 }

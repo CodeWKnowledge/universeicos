@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { getSupabaseClient } from '@universe/database'
 import { ROUTES } from '@universe/constants'
 import { Spinner, toast } from '@universe/ui'
+import { useInteractionState } from '../../hooks/useInteractionState'
 
 export function AuthCallback() {
   const navigate = useNavigate()
   const [error, setError] = useState<string | null>(null)
+  const { markInteraction } = useInteractionState()
 
   useEffect(() => {
     const handleCallback = async () => {
@@ -23,6 +25,7 @@ export function AuthCallback() {
 
       if (session) {
         toast.success('Successfully logged in!')
+        markInteraction(session.user.email)
 
         // Only send the welcome email for brand-new signups (created within the last 5 minutes)
         const isNewUser = new Date(session.user.created_at).getTime() > Date.now() - 5 * 60 * 1000
@@ -47,6 +50,7 @@ export function AuthCallback() {
           const { data: { session } } = await supabase.auth.getSession()
           if (session) {
             toast.success('Successfully logged in!')
+            markInteraction(session.user.email)
 
             const isNewUser = new Date(session.user.created_at).getTime() > Date.now() - 5 * 60 * 1000
             if (isNewUser) {

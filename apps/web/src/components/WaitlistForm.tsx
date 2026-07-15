@@ -5,11 +5,13 @@ import { waitlistSchema, type WaitlistFormData } from '@universe/validation'
 import { UNIVERSITIES, UNIVERSITY_ACADEMICS, GRADUATION_YEARS } from '@universe/constants'
 import { Button, Input, Select, Label } from '@universe/ui'
 import { useWaitlistSubmit } from '../hooks/useWaitlistSubmit'
+import { useInteractionState } from '../hooks/useInteractionState'
 
 const OTHER_VALUE = '__OTHER__'
 
 export function WaitlistForm() {
   const { submit, isSubmitting, isSuccess } = useWaitlistSubmit()
+  const { markInteraction } = useInteractionState()
 
   // Guided selection state — separate from react-hook-form to drive UI logic
   const [selectedUniversity, setSelectedUniversity] = useState('')
@@ -83,6 +85,7 @@ export function WaitlistForm() {
 
   const onSubmit = async (data: WaitlistFormData) => {
     await submit(data)
+    markInteraction(data.email)
   }
 
   if (isSuccess) {
