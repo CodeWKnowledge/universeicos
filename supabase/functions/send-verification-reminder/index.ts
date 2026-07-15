@@ -134,15 +134,16 @@ serve(async (req) => {
           email: profile.email,
         })
 
-        if (linkErr || !linkData?.properties?.token_hash) {
+        if (linkErr || !linkData?.properties?.hashed_token) {
           results.push({ user_id: userId, success: false, error: linkErr?.message ?? 'Failed to generate link' })
           continue
         }
 
         // 3. Build the verification URL pointing directly to our frontend callback.
-        //    This bypasses the Supabase redirect entirely and works with our custom auth hook setup.
+        //    Supabase returns `hashed_token` in generateLink; we pass it as `token_hash` in the
+        //    URL because that's what verifyOtp() expects on the client side.
         const params = new URLSearchParams({
-          token_hash: linkData.properties.token_hash,
+          token_hash: linkData.properties.hashed_token,
           type: 'signup',
         })
         const verifyUrl = `${webAppUrl}/auth/callback?${params.toString()}`
