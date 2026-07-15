@@ -12,6 +12,7 @@ export default defineConfig({
     port: 5174,
   },
   resolve: {
+    dedupe: ['react', 'react-dom', 'sonner'],
     alias: {
       '@universe/ui': path.resolve(__dirname, '../../packages/ui/src'),
       '@universe/utils': path.resolve(__dirname, '../../packages/utils/src'),
