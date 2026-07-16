@@ -131,7 +131,7 @@ serve(async req => {
         subject = 'Verify your Universe email'
         const el = React.createElement(VerifyEmail, {
           name: firstName,
-          verificationUrl: actionUrl,
+          verifyUrl: actionUrl,
           email: user.email,
         })
         html = render(el)
@@ -167,10 +167,10 @@ serve(async req => {
         const role = user.user_metadata?.role || 'admin'
         const inviterName = user.user_metadata?.invited_by_name || 'The Universe Team'
         const el = React.createElement(AdminInvitationEmail, {
-          name: firstName,
+          inviteeName: firstName,
           inviterName,
           role,
-          setupUrl: actionUrl,
+          setPasswordUrl: actionUrl,
         })
         html = render(el)
         text = render(el, { plainText: true })

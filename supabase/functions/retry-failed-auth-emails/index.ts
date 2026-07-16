@@ -142,10 +142,10 @@ serve(async req => {
           const role = 'admin'
           const inviterName = 'The Universe Team'
           const el = React.createElement(AdminInvitationEmail, {
-            name: firstName,
+            inviteeName: firstName,
             inviterName,
             role,
-            setupUrl: actionUrl,
+            setPasswordUrl: actionUrl,
           })
           html = render(el)
           text = render(el, { plainText: true })

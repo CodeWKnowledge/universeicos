@@ -49,8 +49,18 @@ export function AuthCallback() {
       // 1. Explicit token hash verification (Query Params)
       supabase.auth.verifyOtp({ token_hash: tokenHash, type }).then(({ data, error }) => {
         if (!mounted) return
-        if (error) setError(error.message)
-        else if (data?.session) handleSuccess(data.session)
+        if (error) {
+          const isPkceError =
+            error.message.toLowerCase().includes('pkce') ||
+            error.message.toLowerCase().includes('auth session missing') ||
+            error.message.toLowerCase().includes('invalid token') ||
+            error.message.toLowerCase().includes('not found')
+          setError(
+            isPkceError
+              ? 'Security check failed. Please open this link in the exact same browser/device where you requested it, or request a new link.'
+              : error.message
+          )
+        } else if (data?.session) handleSuccess(data.session)
       })
     } else {
       // 2. Hash-based resolution (Fragment processing by Supabase Auth)
