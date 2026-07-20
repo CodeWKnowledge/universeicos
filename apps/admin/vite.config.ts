@@ -15,6 +15,7 @@ export default defineConfig({
     dedupe: ['react', 'react-dom', 'sonner'],
     alias: {
       '@universe/ui': path.resolve(__dirname, '../../packages/ui/src'),
+      '@universe/auth': path.resolve(__dirname, '../../packages/auth/src'),
       '@universe/utils': path.resolve(__dirname, '../../packages/utils/src'),
       '@universe/constants': path.resolve(__dirname, '../../packages/constants/src'),
       '@universe/hooks': path.resolve(__dirname, '../../packages/hooks/src'),

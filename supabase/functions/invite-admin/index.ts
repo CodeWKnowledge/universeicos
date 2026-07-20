@@ -86,9 +86,12 @@ serve(async req => {
       // For now, profiles.role handles the primary admin check according to 0008_admin_roles.sql
     } else {
       // User doesn't exist, invite them
-      // Determine dynamic redirectTo based on origin (fallback to prod)
-      const origin = req.headers.get('origin') || 'https://admin.universeicos.app'
-      const redirectTo = `${origin}/auth/callback`
+      // Use a trusted environment variable — never trust the request Origin header
+      // for security-critical redirect URLs. A spoofed Origin header could otherwise
+      // cause invitation emails to link to an attacker-controlled domain.
+      // Set ADMIN_APP_URL = https://admin.universeicos.app in Supabase Edge Function secrets.
+      const adminAppUrl = Deno.env.get('ADMIN_APP_URL') ?? 'https://admin.universeicos.app'
+      const redirectTo = `${adminAppUrl}/auth/callback`
 
       const { data: inviteData, error: inviteError } =
         await adminClient.auth.admin.inviteUserByEmail(email, {

@@ -30,7 +30,7 @@ serve(async req => {
     // Admin client — full auth.admin access
     const supabase = createClient(supabaseUrl, serviceKey)
 
-    // ── Auth: caller must be an authenticated admin ──────────────────────────
+    // ── Auth: caller must be an authenticated admin OR the cron system ───────
     const authHeader = req.headers.get('Authorization') ?? ''
     const callerToken = authHeader.replace('Bearer ', '')
 
@@ -41,40 +41,49 @@ serve(async req => {
       })
     }
 
-    // Verify caller identity
-    const callerClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
-      global: { headers: { Authorization: authHeader } },
-    })
-    const {
-      data: { user: callerUser },
-      error: callerErr,
-    } = await callerClient.auth.getUser()
+    // Fast-path: pg_cron passes the service role key directly (not a user JWT).
+    // This matches the auth pattern established in comms-queue-worker.
+    // The key is read from the Supabase Vault inside the DB — never from the browser.
+    const isCronRequest = callerToken === serviceKey
 
-    if (callerErr || !callerUser) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 401,
+    if (!isCronRequest) {
+      // Manual trigger from the Admin UI — validate the user's session JWT.
+      const callerClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
+        global: { headers: { Authorization: authHeader } },
       })
-    }
+      const {
+        data: { user: callerUser },
+        error: callerErr,
+      } = await callerClient.auth.getUser()
 
-    // Verify the caller is an admin
-    const { data: callerProfile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', callerUser.id)
-      .single()
+      if (callerErr || !callerUser) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401,
+        })
+      }
 
-    if (!callerProfile || !['admin', 'super_admin', 'moderator'].includes(callerProfile.role)) {
-      return new Response(JSON.stringify({ error: 'Forbidden: admin access required' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 403,
-      })
+      // Verify the caller holds an admin-level role.
+      const { data: callerProfile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', callerUser.id)
+        .single()
+
+      if (!callerProfile || !['admin', 'super_admin', 'moderator'].includes(callerProfile.role)) {
+        return new Response(JSON.stringify({ error: 'Forbidden: admin access required' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 403,
+        })
+      }
     }
+    // If isCronRequest === true, the service key IS the authorization. Proceed.
 
     // ── Parse request body ───────────────────────────────────────────────────
     const body = await req.json()
     const trigger_source: string = body.trigger_source ?? 'manual'
-    const triggered_by: string = body.triggered_by ?? callerUser.id
+    // For cron-triggered requests callerUser is not available; use 'system' as the actor.
+    const triggered_by: string = body.triggered_by ?? (isCronRequest ? 'system' : 'unknown')
 
     // Normalize to array of user_ids
     const userIds: string[] = body.user_ids ? body.user_ids : body.user_id ? [body.user_id] : []
