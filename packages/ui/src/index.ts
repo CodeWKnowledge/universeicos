@@ -6,7 +6,7 @@ export * from './components/Spinner'
 export * from './components/EmptyState'
 export * from './components/Modal'
 export * from './components/ErrorBoundary'
-export * from './components/RouteErrorFallback'
+export * from './components/RouteErrorFallback' // exports ErrorFallbackUI
 
 // Re-export toast for convenience
 export { toast } from 'sonner'

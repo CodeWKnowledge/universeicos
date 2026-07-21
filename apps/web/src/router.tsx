@@ -1,7 +1,8 @@
 import { createBrowserRouter } from 'react-router-dom'
 import { lazy, Suspense } from 'react'
 import { ROUTES } from '@universe/constants'
-import { Spinner, RouteErrorFallback } from '@universe/ui'
+import { Spinner } from '@universe/ui'
+import { RouteErrorFallback } from './components/RouteErrorFallback'
 
 // Layouts
 import { PublicLayout } from './layouts/PublicLayout'

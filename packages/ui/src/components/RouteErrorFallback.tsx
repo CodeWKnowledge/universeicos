@@ -1,39 +1,20 @@
-import { useRouteError, isRouteErrorResponse } from 'react-router-dom'
 import { Button } from './Button'
 
-export function RouteErrorFallback() {
-  const error = useRouteError()
+interface ErrorFallbackUIProps {
+  title?: string
+  description?: string
+  is404?: boolean
+}
 
-  let title = 'Something went wrong'
-  let description =
-    'We encountered an unexpected error. Please try again or return to the homepage.'
-  let is404 = false
-
-  if (isRouteErrorResponse(error)) {
-    if (error.status === 404) {
-      is404 = true
-      title = 'Page not found'
-      description = "The page you are looking for doesn't exist or has been moved."
-    } else {
-      title = `${error.status} ${error.statusText}`
-      description = error.data?.message || description
-    }
-  } else if (error instanceof Error) {
-    if (
-      error.message.includes('Missing or invalid required environment variables') ||
-      error.message.includes('Missing Supabase environment variables')
-    ) {
-      title = 'Configuration Error'
-      description =
-        'The application is missing required environment variables. Please check your hosting configuration.'
-    } else {
-      // Show the message, which helps developers identify what failed
-      description = error.message || description
-    }
-  } else if (typeof error === 'string') {
-    description = error
-  }
-
+/**
+ * Generic error UI — no router dependency.
+ * Used directly or wrapped by app-level RouteErrorFallback components.
+ */
+export function ErrorFallbackUI({
+  title = 'Something went wrong',
+  description = 'We encountered an unexpected error. Please try again or return to the homepage.',
+  is404 = false,
+}: ErrorFallbackUIProps) {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-zinc-50 px-4">
       <div className="w-full max-w-md rounded-xl border border-zinc-200 bg-white p-8 shadow-sm text-center">

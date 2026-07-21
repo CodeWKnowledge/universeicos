@@ -3,7 +3,8 @@ import { lazy, Suspense } from 'react'
 import { ROUTES } from '@universe/constants'
 import { AdminLayout } from './layouts/AdminLayout'
 import { RequireAuth, RoleGuard, GuestRoute } from '@universe/auth'
-import { Spinner, RouteErrorFallback } from '@universe/ui'
+import { Spinner } from '@universe/ui'
+import { RouteErrorFallback } from './components/RouteErrorFallback'
 
 // Auth Pages
 import { AdminLoginPage } from './pages/auth/AdminLoginPage'
