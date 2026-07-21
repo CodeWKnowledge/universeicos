@@ -1,4 +1,4 @@
-import React, { createContext, useEffect } from 'react'
+import React, { createContext, useEffect, useMemo } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { getSupabaseClient } from '@universe/database'
 import type { Session, User } from '@supabase/supabase-js'
@@ -20,12 +20,22 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient()
-  const supabase = getSupabaseClient()
+  // Memoize to ensure a single Supabase client instance per component lifetime.
+  // Calling getSupabaseClient() directly in the render body causes re-initialization
+  // on every render and triggers async auth callbacks mid-render.
+  const supabase = useMemo(() => getSupabaseClient(), [])
 
-  const { data: sessionData, isLoading: isLoadingSession, error: sessionError } = useQuery({
+  const {
+    data: sessionData,
+    isLoading: isLoadingSession,
+    error: sessionError,
+  } = useQuery({
     queryKey: ['auth', 'session'],
     queryFn: async () => {
-      const { data: { session }, error } = await supabase.auth.getSession()
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession()
       if (error) throw error
       return session
     },
@@ -34,31 +44,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const user = sessionData?.user ?? null
 
-  const { data: profileData, isLoading: isLoadingProfile, error: profileError } = useQuery({
+  const {
+    data: profileData,
+    isLoading: isLoadingProfile,
+    error: profileError,
+  } = useQuery({
     queryKey: ['auth', 'profile', user?.id],
     queryFn: async () => {
       if (!user) return null
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single()
-      
+      const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+
       if (error) throw error
       return data
     },
     enabled: !!user,
   })
 
-  const { data: accessData, isLoading: isLoadingAccess, error: accessError } = useQuery({
+  const {
+    data: accessData,
+    isLoading: isLoadingAccess,
+    error: accessError,
+  } = useQuery({
     queryKey: ['auth', 'access', user?.id],
     queryFn: async () => {
       if (!user) return { roles: [], permissions: [] }
-      
+
       // Fetch user roles
       const { data: userRoles, error: rolesError } = await supabase
         .from('user_roles')
-        .select(`
+        .select(
+          `
           roles (
             name,
             role_permissions (
@@ -68,9 +83,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               )
             )
           )
-        `)
+        `
+        )
         .eq('user_id', user.id)
-      
+
       if (rolesError) throw rolesError
 
       const roles = new Set<string>()
@@ -91,14 +107,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       return {
         roles: Array.from(roles),
-        permissions: Array.from(permissions)
+        permissions: Array.from(permissions),
       }
     },
     enabled: !!user,
   })
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       queryClient.setQueryData(['auth', 'session'], session)
       if (!session) {
         // Clear related queries on logout
