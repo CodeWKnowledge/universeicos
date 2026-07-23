@@ -5,6 +5,7 @@ import { Copy01Icon, CheckmarkBadge01Icon, Time02Icon } from 'hugeicons-react'
 import { toast } from 'sonner'
 import { formatDistanceToNow } from 'date-fns'
 import { APP_URL } from '@universe/constants'
+import { WhatsappIcon, TwitterIcon, Mail01Icon } from 'hugeicons-react'
 
 export function ReferralsPage() {
   const { user } = useAuth()
@@ -26,30 +27,83 @@ export function ReferralsPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">Referrals</h1>
-          <p className="text-sm text-zinc-500 mt-1">Invite friends and earn points to climb the leaderboard.</p>
+          <p className="text-sm text-zinc-500 mt-1">
+            Invite friends and earn points to climb the leaderboard.
+          </p>
         </div>
-        <Button onClick={handleCopyLink} className="flex items-center gap-2">
-          <Copy01Icon size={18} />
-          Copy Invite Link
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Button onClick={handleCopyLink} className="flex items-center gap-2">
+            <Copy01Icon size={18} />
+            Copy Invite Link
+          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (!profile?.referral_code) return
+                const link = `${APP_URL}/waitlist?ref=${profile.referral_code}`
+                window.open(
+                  `https://wa.me/?text=${encodeURIComponent(`Join me on Universe and get exclusive access! ${link}`)}`,
+                  '_blank'
+                )
+              }}
+              className="flex items-center gap-2 px-3 bg-[#25D366] text-white hover:bg-[#128C7E] border-none"
+            >
+              <WhatsappIcon size={18} />
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (!profile?.referral_code) return
+                const link = `${APP_URL}/waitlist?ref=${profile.referral_code}`
+                window.open(
+                  `https://twitter.com/intent/tweet?text=${encodeURIComponent('Join me on Universe and get exclusive access!')}&url=${encodeURIComponent(link)}`,
+                  '_blank'
+                )
+              }}
+              className="flex items-center gap-2 px-3 bg-black text-white hover:bg-zinc-800 border-none"
+            >
+              <TwitterIcon size={18} />
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (!profile?.referral_code) return
+                const link = `${APP_URL}/waitlist?ref=${profile.referral_code}`
+                window.open(
+                  `mailto:?subject=${encodeURIComponent('Join me on Universe!')}&body=${encodeURIComponent(`Check out Universe, an exclusive platform for university students. Join using my referral link: ${link}`)}`
+                )
+              }}
+              className="flex items-center gap-2 px-3"
+            >
+              <Mail01Icon size={18} />
+            </Button>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardContent className="p-6">
-            <div className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-2">Total Invites</div>
+            <div className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+              Total Invites
+            </div>
             <div className="text-3xl font-extrabold text-zinc-900">{stats.total}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
-            <div className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-2">Verified</div>
+            <div className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+              Verified
+            </div>
             <div className="text-3xl font-extrabold text-emerald-600">{stats.completed}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-6">
-            <div className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-2">Pending</div>
+            <div className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+              Pending
+            </div>
             <div className="text-3xl font-extrabold text-orange-500">{stats.pending}</div>
           </CardContent>
         </Card>
@@ -79,36 +133,42 @@ export function ReferralsPage() {
               </div>
               <h3 className="text-sm font-semibold text-zinc-900">No referrals yet</h3>
               <p className="text-xs text-zinc-500 mt-1 max-w-sm mx-auto">
-                Share your link to invite friends. Once they sign up and verify, they'll appear here.
+                Share your link to invite friends. Once they sign up and verify, they'll appear
+                here.
               </p>
             </div>
           ) : (
             <div className="divide-y divide-zinc-100">
               {list.map((ref, index) => {
-                const referred = (Array.isArray(ref.referred) ? ref.referred[0] : ref.referred) as { full_name?: string } | undefined
+                const referred = (Array.isArray(ref.referred) ? ref.referred[0] : ref.referred) as
+                  { full_name?: string } | undefined
                 return (
-                <div key={index} className="py-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 font-bold text-sm shrink-0">
-                      {referred?.full_name ? referred.full_name.slice(0, 2).toUpperCase() : '??'}
+                  <div key={index} className="py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 font-bold text-sm shrink-0">
+                        {referred?.full_name ? referred.full_name.slice(0, 2).toUpperCase() : '??'}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-zinc-900">
+                          {referred?.full_name || 'Anonymous Student'}
+                        </p>
+                        <p className="text-xs text-zinc-500">
+                          Joined {formatDistanceToNow(new Date(ref.created_at))} ago
+                        </p>
+                      </div>
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-zinc-900">{referred?.full_name || 'Anonymous Student'}</p>
-                      <p className="text-xs text-zinc-500">Joined {formatDistanceToNow(new Date(ref.created_at))} ago</p>
+                      {ref.status === 'completed' ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold">
+                          <CheckmarkBadge01Icon size={14} /> Verified
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-50 text-orange-700 text-xs font-semibold">
+                          <Time02Icon size={14} /> Pending
+                        </span>
+                      )}
                     </div>
                   </div>
-                  <div>
-                    {ref.status === 'completed' ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold">
-                        <CheckmarkBadge01Icon size={14} /> Verified
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-50 text-orange-700 text-xs font-semibold">
-                        <Time02Icon size={14} /> Pending
-                      </span>
-                    )}
-                  </div>
-                </div>
                 )
               })}
             </div>

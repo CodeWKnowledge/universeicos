@@ -1,6 +1,6 @@
 import { serve } from 'std/http/server.ts'
 import { createClient } from '@supabase/supabase-js'
-import { render } from 'npm:@react-email/render@0.0.12'
+import { renderAsync } from 'npm:@react-email/render@0.0.12'
 import React from 'npm:react@18.2.0'
 
 // Import all auth email templates
@@ -134,8 +134,8 @@ serve(async req => {
           verifyUrl: actionUrl,
           email: user.email,
         })
-        html = render(el)
-        text = render(el, { plainText: true })
+        html = await renderAsync(el)
+        text = await renderAsync(el, { plainText: true })
         break
       }
 
@@ -145,8 +145,8 @@ serve(async req => {
           name: firstName,
           resetUrl: actionUrl,
         })
-        html = render(el)
-        text = render(el, { plainText: true })
+        html = await renderAsync(el)
+        text = await renderAsync(el, { plainText: true })
         break
       }
 
@@ -157,8 +157,8 @@ serve(async req => {
           loginUrl: actionUrl,
           email: user.email,
         })
-        html = render(el)
-        text = render(el, { plainText: true })
+        html = await renderAsync(el)
+        text = await renderAsync(el, { plainText: true })
         break
       }
 
@@ -172,8 +172,8 @@ serve(async req => {
           role,
           setPasswordUrl: actionUrl,
         })
-        html = render(el)
-        text = render(el, { plainText: true })
+        html = await renderAsync(el)
+        text = await renderAsync(el, { plainText: true })
         break
       }
 
